@@ -258,15 +258,17 @@ struct ContentView: View {
         case "status":
             add("MISSION: UNKNOWN SIGNAL", "system")
             add("SESSION: ACTIVE")
-            add("CHAPTER: 01 / UNKNOWN SIGNAL")
-            add("EVIDENCE: \(discovered.count)/6")
-            add("OBJECTIVE: Identify the origin of the 03:17 signal.")
-            if chapterComplete { add("CHAPTER STATUS: COMPLETE", "success") }
+            add(chapterTwoUnlocked ? "CHAPTER: 02 / STATION NINE" : "CHAPTER: 01 / UNKNOWN SIGNAL")
+            add("EVIDENCE: \\(discovered.count)")
+            add(chapterTwoUnlocked ? "OBJECTIVE: Identify the destination hidden beneath Sector Zero." : "OBJECTIVE: Identify the origin of the 03:17 signal.")
+            if chapterComplete { add("CHAPTER 01 STATUS: COMPLETE", "success") }
+            if chapterTwoComplete { add("CHAPTER 02 STATUS: COMPLETE", "success") }
         case "files":
             guard parts.count >= 2 else { add("Usage: files list | files read <name>", "warning"); return }
             if parts[1] == "list" {
-                add("ARCHIVE DIRECTORY // 6 ENTRIES", "system")
-                fileNames.forEach { add("[FILE] \($0)", discovered.contains($0) ? "success" : "normal") }
+                let availableFiles = chapterTwoUnlocked ? fileNames + ["station_nine.log", "door_auth.enc", "mira_final.txt"] : fileNames
+                add("ARCHIVE DIRECTORY // \\(availableFiles.count) ENTRIES", "system")
+                availableFiles.forEach { add("[FILE] \\($0)", discovered.contains($0) ? "success" : "normal") }
             } else if parts[1] == "read" {
                 guard parts.count >= 3 else { add("Usage: files read <name>", "warning"); return }
                 readFile(parts.dropFirst(2).joined(separator: " "))

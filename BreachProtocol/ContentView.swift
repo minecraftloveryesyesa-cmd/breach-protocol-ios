@@ -23,6 +23,8 @@ private struct SaveData: Codable {
 
 struct ContentView: View {
     @AppStorage("bp_hasSave") private var hasSave = false
+    @AppStorage("bp_language") private var language = "ja"
+    private var isJapanese: Bool { language == "ja" }
     @State private var input = ""
     @State private var lines: [TerminalLine] = [
         TerminalLine(text: "BREACH PROTOCOL // FIELD TERMINAL v1.0", kind: "system"),
@@ -68,13 +70,20 @@ struct ContentView: View {
                 Text("BREACH PROTOCOL")
                     .font(.system(size: 15, weight: .bold, design: .monospaced))
                     .tracking(1.2).foregroundStyle(.white)
-                Text("NARRATIVE TERMINAL // CH.01")
+                Text(isJapanese ? "ストーリー端末 // 第01章" : "NARRATIVE TERMINAL // CH.01")
                     .font(.system(size: 9, weight: .medium, design: .monospaced))
                     .tracking(1).foregroundStyle(Theme.muted)
             }
+            Button { language = isJapanese ? "en" : "ja" } label: {
+                Text(isJapanese ? "日本語 / EN" : "EN / 日本語")
+                    .font(.system(size: 10, weight: .bold, design: .monospaced))
+                    .foregroundStyle(Theme.cyan)
+                    .padding(.horizontal, 8).padding(.vertical, 6)
+                    .overlay(Capsule().stroke(Theme.cyan.opacity(0.45), lineWidth: 1))
+            }
             Spacer()
             Circle().fill(chapterComplete ? Theme.amber : Theme.cyan).frame(width: 7, height: 7)
-            Text(chapterComplete ? "CLEARED" : "ONLINE")
+            Text(chapterComplete ? (isJapanese ? "攻略完了" : "CLEARED") : (isJapanese ? "接続中" : "ONLINE"))
                 .font(.system(size: 10, weight: .bold, design: .monospaced))
                 .foregroundStyle(chapterComplete ? Theme.amber : Theme.cyan)
         }
@@ -85,13 +94,13 @@ struct ContentView: View {
 
     private var statusStrip: some View {
         HStack {
-            Label("AEGIS / RESTRICTED", systemImage: "lock.fill")
+            Label(isJapanese ? "AEGIS / 機密区分" : "AEGIS / RESTRICTED", systemImage: "lock.fill")
             Spacer()
             Text("EVIDENCE \(discovered.count)/3").foregroundStyle(Theme.cyan)
             Button { showEvidence = true } label: {
                 Image(systemName: "folder.badge.questionmark").foregroundStyle(Theme.cyan)
             }
-            .accessibilityLabel("Open evidence")
+            .accessibilityLabel(isJapanese ? "証拠を開く" : "Open evidence")
         }
         .font(.system(size: 9, weight: .medium, design: .monospaced))
         .tracking(0.5).foregroundStyle(Theme.muted)
@@ -136,12 +145,12 @@ struct ContentView: View {
                     .font(.system(size: 14, design: .monospaced)).foregroundStyle(.white)
                     .autocorrectionDisabled().textInputAutocapitalization(.never)
                     .submitLabel(.send).focused($inputFocused).onSubmit(submitCommand)
-                    .accessibilityLabel("Game command")
+                    .accessibilityLabel(isJapanese ? "ゲームコマンド" : "Game command")
                 Button(action: submitCommand) {
                     Image(systemName: "arrow.up").font(.system(size: 14, weight: .bold))
                         .foregroundStyle(Theme.bg).frame(width: 37, height: 37)
                         .background(Theme.cyan).clipShape(RoundedRectangle(cornerRadius: 9))
-                }.accessibilityLabel("Run command")
+                }.accessibilityLabel(isJapanese ? "コマンドを実行" : "Run command")
             }
             .padding(.leading, 13).padding(.trailing, 6).padding(.vertical, 6)
             .background(Theme.panel).clipShape(RoundedRectangle(cornerRadius: 12))
@@ -158,7 +167,7 @@ struct ContentView: View {
                 Theme.bg.ignoresSafeArea()
                 List {
                     if discovered.isEmpty {
-                        Text("No evidence collected yet. Explore files from the terminal.")
+                        Text(isJapanese ? "証拠はまだありません。端末からファイルを調査してください。" : "No evidence collected yet. Explore files from the terminal.")
                             .foregroundStyle(Theme.muted).listRowBackground(Theme.panel)
                     }
                     ForEach(discovered.sorted(), id: \.self) { item in
@@ -171,10 +180,10 @@ struct ContentView: View {
                     }
                 }.scrollContentBackground(.hidden)
             }
-            .navigationTitle("EVIDENCE FILE").navigationBarTitleDisplayMode(.inline)
+            .navigationTitle(isJapanese ? "証拠ファイル" : "EVIDENCE FILE").navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("Done") { showEvidence = false }.foregroundStyle(Theme.cyan)
+                    Button(isJapanese ? "閉じる" : "Done") { showEvidence = false }.foregroundStyle(Theme.cyan)
                 }
             }
         }.preferredColorScheme(.dark)
@@ -199,7 +208,7 @@ struct ContentView: View {
     }
 
     private func add(_ text: String, _ kind: String = "normal") {
-        lines.append(TerminalLine(text: text, kind: kind))
+        lines.append(TerminalLine(text: localized(text), kind: kind))
         if lines.count > 300 { lines.removeFirst(lines.count - 300) }
         saveGame()
     }
@@ -321,6 +330,64 @@ struct ContentView: View {
         case "personnel.enc": return "Personnel cache: an unlisted credential was active at 03:17."
         default: return "Recovered record."
         }
+    }
+
+    private func localized(_ text: String) -> String {
+        guard isJapanese else { return text }
+        let exact: [String: String] = [
+            "BREACH PROTOCOL // FIELD TERMINAL v1.0": "BREACH PROTOCOL // フィールド端末 v1.0",
+            "Secure session established.": "セキュアセッションを確立しました。",
+            "INCOMING MESSAGE: IF YOU CAN READ THIS, THEY ALREADY KNOW.": "受信メッセージ：これが読めるなら、相手はすでに気づいている。",
+            "Type 'help' to view available commands.": "利用可能なコマンドは 'help' で確認できます。",
+            "AVAILABLE COMMANDS": "利用可能なコマンド",
+            "Show this command list": "コマンド一覧を表示", "Mission status": "ミッション状況",
+            "List available files": "ファイル一覧を表示", "Read an evidence file": "証拠ファイルを読む",
+            "Search discovered records": "調査済み記録を検索", "Review collected clues": "収集した手がかりを確認",
+            "Submit the Chapter 01 cipher": "第01章の暗号を解読", "Clear visible terminal": "端末表示を消去",
+            "Reset Chapter 01 progress": "第01章の進行状況をリセット",
+            "MISSION: UNKNOWN SIGNAL": "ミッション：未知の信号", "SESSION: ACTIVE": "セッション：稼働中",
+            "CHAPTER: 01 / UNKNOWN SIGNAL": "章：01 / 未知の信号", "OBJECTIVE: Identify the origin of the 03:17 signal.": "目標：03:17に検出された信号の発信源を特定する。",
+            "CHAPTER STATUS: COMPLETE": "章の状態：クリア", "ARCHIVE DIRECTORY // 3 ENTRIES": "アーカイブ一覧 // 3件",
+            "Usage: files list | files read <name>": "使い方：files list または files read <ファイル名>",
+            "Usage: files read <name>": "使い方：files read <ファイル名>",
+            "Unknown files operation. Try 'files list'.": "不明な操作です。'files list' を試してください。",
+            "No indexed records. Read a file first.": "検索対象の記録がありません。先にファイルを読んでください。",
+            "MATCH: signal detected at 03:17": "一致：03:17に信号を検出", "MATCH: origin classified as INTERNAL NODE": "一致：発信源は内部ノードに分類", "MATCH: operator ID withheld": "一致：オペレーターIDは秘匿",
+            "No evidence collected. Try 'files list'.": "証拠はまだありません。'files list' を試してください。",
+            "CIPHER ACCEPTED.": "暗号を確認しました。", "INSUFFICIENT EVIDENCE. Read at least two archive files.": "証拠が不足しています。アーカイブを2つ以上読んでください。",
+            "DECODE FAILED. Re-examine the records and search the logs.": "解読失敗。記録を再確認し、ログを検索してください。",
+            "Terminal cleared. Progress remains saved.": "端末表示を消去しました。進行状況は保存されています。",
+            "New investigation initialized.": "新しい調査を開始しました。",
+            "FILE NOT FOUND. Use 'files list' to see available records.": "ファイルが見つかりません。'files list' で一覧を確認してください。",
+            "EVIDENCE ADDED: incident_2049.log": "証拠を追加：incident_2049.log",
+            "EVIDENCE ADDED: signal_fragment.dat": "証拠を追加：signal_fragment.dat",
+            "EVIDENCE ADDED: personnel.enc": "証拠を追加：personnel.enc",
+            "ACCESS RESTRICTED // PARTIAL CACHE RECOVERED": "アクセス制限 // キャッシュの一部を復元",
+            "A staff credential was active at 03:17.": "03:17に職員の認証情報が使用されていた。",
+            "The operator's identity is missing from the official roster.": "オペレーターの身元は公式名簿に存在しない。",
+            "Chapter 02 is locked in this build. Your progress has been saved.": "第02章は今後のアップデートで追加予定です。進行状況は保存されました。"
+        ]
+        if let translated = exact[text] { return translated }
+        if text.hasPrefix("[FILE] ") { return "[ファイル] " + text.replacingOccurrences(of: "[FILE] ", with: "") }
+        if text.hasPrefix("[CONFIRMED] ") { return "[確認済み] " + text.replacingOccurrences(of: "[CONFIRMED] ", with: "") }
+        if text.hasPrefix("EVIDENCE ADDED: ") { return "証拠を追加：" + text.replacingOccurrences(of: "EVIDENCE ADDED: ", with: "") }
+        if text.hasPrefix("Command not found: ") { return "コマンドが見つかりません：" + text.replacingOccurrences(of: "Command not found: ", with: "") + "。'help' で一覧を確認してください。" }
+        if text.hasPrefix("No matches for '") { return "一致する記録はありません：" + text.replacingOccurrences(of: "No matches for '", with: "").replacingOccurrences(of: "'.", with: "") }
+        if text.hasPrefix("operator@bp:~$ ") { return "操作者@bp:~$ " + text.replacingOccurrences(of: "operator@bp:~$ ", with: "") }
+        if text.hasPrefix("EVIDENCE REGISTER // ") { return "証拠一覧 // " + text.replacingOccurrences(of: "EVIDENCE REGISTER // ", with: "") + "件" }
+        if text.hasPrefix("CHAPTER 01 COMPLETE") { return "第01章クリア // 信号の発信源：内部ノード" }
+        if text.hasPrefix("A new message appears:") { return "新しいメッセージ：「扉は見つけた。次は、誰が開けたのかを探せ。」" }
+        if text.hasPrefix("EVIDENCE: ") { return "証拠：" + text.replacingOccurrences(of: "EVIDENCE: ", with: "") }
+        if text.hasPrefix("OPENING incident_2049.log") { return "incident_2049.log を開いています" }
+        if text.hasPrefix("DECODING signal_fragment.dat") { return "signal_fragment.dat を解析しています" }
+        if text.hasPrefix("READING personnel.enc") { return "personnel.enc を読み込んでいます" }
+        if text.hasPrefix("Origin field:") { return "発信源：" + text.replacingOccurrences(of: "Origin field: ", with: "") }
+        if text.hasPrefix("Incident marked for deletion") { return "検出から4秒後にインシデント削除が予約された。" }
+        if text.hasPrefix("FRAGMENT:") { return "断片：" + text.replacingOccurrences(of: "FRAGMENT: ", with: "") }
+        if text.hasPrefix("Metadata:") { return "メタデータ：" + text.replacingOccurrences(of: "Metadata: ", with: "") }
+        if text.hasPrefix("MATCH:") { return "一致：" + text.replacingOccurrences(of: "MATCH: ", with: "") }
+        if text.hasPrefix("EVIDENCE: ") { return "証拠：" + text.replacingOccurrences(of: "EVIDENCE: ", with: "") }
+        return text
     }
 
     private func saveGame() {

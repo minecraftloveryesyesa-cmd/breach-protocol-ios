@@ -242,9 +242,12 @@ struct ContentView: View {
             add(isJapanese ? "decode <answer>      第01章の答えを送信" : "decode <answer>      Submit the Chapter 01 cipher")
             add(isJapanese ? "clear                端末表示を消去" : "clear                Clear visible terminal")
             add(isJapanese ? "restart              第01章を最初からやり直す" : "restart              Reset Chapter 01 progress")
-            add(isJapanese ? "story                ストーリー記録を読む" : "story                Read the expanded story")\n            add(isJapanese ? "timeline             事件の時系列を確認" : "timeline             Review the incident timeline")
+            add(isJapanese ? "story                ストーリー記録を読む" : "story                Read the expanded story")
+            add(isJapanese ? "timeline             事件の時系列を確認" : "timeline             Review the incident timeline")
         case "story", "lore", "briefing":
             showStory()
+        case "timeline":
+            showTimeline()
         case "hint", "hints":
             showHint()
         case "status":
@@ -330,6 +333,17 @@ struct ContentView: View {
         add(isJapanese ? "第三の謎：公式図面にない地下区画SECTOR ZERO。その奥にはSTATION NINEという扉がある。" : "MYSTERY THREE: SECTOR ZERO, a lower archive absent from official maps. A door inside is labeled STATION NINE.")
         add(isJapanese ? "調査方針：記録を集め、時刻・署名・経路の矛盾を比較しよう。ひとつの証拠だけで結論を決めないこと。" : "INVESTIGATION: Collect records and compare contradictions in timestamps, signatures, and routes. Do not trust a conclusion based on a single clue.", "muted")
         add(isJapanese ? "次の手がかり：files list で追加ファイルを確認しよう。" : "NEXT LEADS: Use files list to inspect the new records.", "success")
+        add(isJapanese ? "仮説：監視映像の停止、職員認証、信号発信は同じ内部操作と関係している可能性がある。ただし、まだ確証はない。" : "WORKING THEORY: The camera shutdown, staff credential, and signal may share an internal operator. This is still only a hypothesis.", "warning")
+    }
+
+    private func showTimeline() {
+        add(isJapanese ? "事件の時系列 // 未検証記録を含む" : "INCIDENT TIMELINE // INCLUDES UNVERIFIED RECORDS", "system")
+        add("03:17:00 — " + (isJapanese ? "閉鎖施設から信号を検出。" : "Signal detected from the sealed facility."))
+        add("03:17:04 — " + (isJapanese ? "インシデント削除が予約された。" : "Incident deletion was scheduled."))
+        add("03:17 — " + (isJapanese ? "名簿にない職員認証情報が使用された。" : "An unlisted staff credential was active."))
+        add("03:17–03:19 — " + (isJapanese ? "WATCHERの映像がループ再生。" : "WATCHER camera footage looped."))
+        add("03:19 — " + (isJapanese ? "内部コンソールから監視停止命令。" : "Surveillance shutdown command from an internal console."))
+        add(isJapanese ? "注意：記録の時計自体が改ざんされた可能性がある。時刻だけを根拠に結論を出さないこと。" : "CAUTION: The clock may itself have been altered. Do not rely on timestamps alone.", "warning")
     }
     private func showCommandHelp(_ topic: String) {
         switch topic {

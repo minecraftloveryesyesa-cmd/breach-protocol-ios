@@ -242,7 +242,7 @@ struct ContentView: View {
             add(isJapanese ? "decode <answer>      第01章の答えを送信" : "decode <answer>      Submit the Chapter 01 cipher")
             add(isJapanese ? "clear                端末表示を消去" : "clear                Clear visible terminal")
             add(isJapanese ? "restart              第01章を最初からやり直す" : "restart              Reset Chapter 01 progress")
-            add(isJapanese ? "story                ストーリー記録を読む" : "story                Read the expanded story")
+            add(isJapanese ? "story                ストーリー記録を読む" : "story                Read the expanded story")\n            add(isJapanese ? "timeline             事件の時系列を確認" : "timeline             Review the incident timeline")
         case "story", "lore", "briefing":
             showStory()
         case "hint", "hints":
@@ -257,7 +257,7 @@ struct ContentView: View {
         case "files":
             guard parts.count >= 2 else { add("Usage: files list | files read <name>", "warning"); return }
             if parts[1] == "list" {
-                add("ARCHIVE DIRECTORY // 3 ENTRIES", "system")
+                add("ARCHIVE DIRECTORY // 6 ENTRIES", "system")
                 fileNames.forEach { add("[FILE] \($0)", discovered.contains($0) ? "success" : "normal") }
             } else if parts[1] == "read" {
                 guard parts.count >= 3 else { add("Usage: files read <name>", "warning"); return }
@@ -294,7 +294,7 @@ struct ContentView: View {
             }
         case "decode":
             let answer = parts.dropFirst().joined(separator: " ").trimmingCharacters(in: .whitespacesAndNewlines)
-            if discovered.count >= 2 && ["internal node", "internal", "node"].contains(answer) {
+            if discovered.count >= 2 && ["internal node", "internal", "node"].contains(answer.lowercased()) {
                 chapterComplete = true
                 add("CIPHER ACCEPTED.", "success")
                 add("CHAPTER 01 COMPLETE // SIGNAL ORIGIN: INTERNAL NODE", "system")
@@ -377,7 +377,7 @@ struct ContentView: View {
     }
 
     private func readFile(_ name: String) {
-        guard fileNames.contains(name) else {
+        guard let matchedName = fileNames.first(where: { $0.caseInsensitiveCompare(name) == .orderedSame }) else {
             add("FILE NOT FOUND. Use 'files list' to see available records.", "error")
             return
         }

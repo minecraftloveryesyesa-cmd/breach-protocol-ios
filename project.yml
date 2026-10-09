@@ -1,0 +1,20 @@
+name: BreachProtocol
+options:
+  bundleIdPrefix: com.breachprotocol
+  deploymentTarget:
+    iOS: "17.0"
+targets:
+  BreachProtocol:
+    type: application
+    platform: iOS
+    sources:
+      - path: BreachProtocol
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.breachprotocol.game
+        PRODUCT_NAME: "BREACH PROTOCOL"
+        SWIFT_VERSION: "5.0"
+        TARGETED_DEVICE_FAMILY: "1"
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_CFBundleDisplayName: "BREACH PROTOCOL"
+        CODE_SIGNING_ALLOWED: NO

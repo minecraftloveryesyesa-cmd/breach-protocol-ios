@@ -254,7 +254,7 @@ struct ContentView: View {
             add("MISSION: UNKNOWN SIGNAL", "system")
             add("SESSION: ACTIVE")
             add("CHAPTER: 01 / UNKNOWN SIGNAL")
-            add("EVIDENCE: \(discovered.count)/3")
+            add("EVIDENCE: \(discovered.count)/6")
             add("OBJECTIVE: Identify the origin of the 03:17 signal.")
             if chapterComplete { add("CHAPTER STATUS: COMPLETE", "success") }
         case "files":
@@ -466,7 +466,7 @@ struct ContentView: View {
             "Reset Chapter 01 progress": "第01章の進行状況をリセット",
             "MISSION: UNKNOWN SIGNAL": "ミッション：未知の信号", "SESSION: ACTIVE": "セッション：稼働中",
             "CHAPTER: 01 / UNKNOWN SIGNAL": "章：01 / 未知の信号", "OBJECTIVE: Identify the origin of the 03:17 signal.": "目標：03:17に検出された信号の発信源を特定する。",
-            "CHAPTER STATUS: COMPLETE": "章の状態：クリア", "ARCHIVE DIRECTORY // 3 ENTRIES": "アーカイブ一覧 // 3件",
+            "CHAPTER STATUS: COMPLETE": "章の状態：クリア", "ARCHIVE DIRECTORY // 6 ENTRIES": "アーカイブ一覧 // 6件",
             "Usage: files list | files read <name>": "使い方：files list または files read <ファイル名>",
             "Usage: files read <name>": "使い方：files read <ファイル名>",
             "Unknown files operation. Try 'files list'.": "不明な操作です。'files list' を試してください。",

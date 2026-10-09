@@ -1,0 +1,53 @@
+name: Build BREACH PROTOCOL iOS
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: macos-15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate Xcode project
+        run: xcodegen generate
+
+      - name: Build unsigned app
+        run: |
+          xcodebuild \
+            -project BreachProtocol.xcodeproj \
+            -scheme BreachProtocol \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath build/DerivedData \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            build
+
+      - name: Package unsigned IPA
+        run: |
+          APP_PATH="build/DerivedData/Build/Products/Release-iphoneos/BreachProtocol.app"
+          test -d "$APP_PATH"
+          mkdir -p build/ipa/Payload
+          cp -R "$APP_PATH" build/ipa/Payload/
+          cd build/ipa
+          /usr/bin/zip -qr ../../BREACH-PROTOCOL-unsigned.ipa Payload
+          cd ../..
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: breach-protocol-ios-unsigned
+          path: |
+            build/DerivedData/Build/Products/Release-iphoneos/BreachProtocol.app
+            BREACH-PROTOCOL-unsigned.ipa
+          if-no-files-found: error
+          retention-days: 14

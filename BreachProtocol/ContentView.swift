@@ -226,8 +226,13 @@ struct ContentView: View {
         guard let first = parts.first else { return }
         switch first {
         case "help":
+            if parts.count > 1 {
+                showCommandHelp(parts.dropFirst().joined(separator: " "))
+                return
+            }
             add("AVAILABLE COMMANDS", "system")
-            add("help                 Show this command list")
+            add("help [command]       Show detailed command help")
+            add("hint                 Get a progressive puzzle hint")
             add("status               Mission status")
             add("files list           List available files")
             add("files read <name>    Read an evidence file")
@@ -236,6 +241,8 @@ struct ContentView: View {
             add("decode <answer>      Submit the Chapter 01 cipher")
             add("clear                Clear visible terminal")
             add("restart              Reset Chapter 01 progress")
+        case "hint", "hints":
+            showHint()
         case "status":
             add("MISSION: UNKNOWN SIGNAL", "system")
             add("SESSION: ACTIVE")
@@ -296,6 +303,51 @@ struct ContentView: View {
         }
     }
 
+    private func showCommandHelp(_ topic: String) {
+        switch topic {
+        case "files":
+            add("FILES COMMAND // HELP", "system")
+            add("files list — show all archive filenames")
+            add("files read <name> — open one file and collect its evidence")
+            add("Example: files read incident_2049.log")
+            add("Tip: filenames must match the archive list exactly.", "muted")
+        case "logs":
+            add("LOGS COMMAND // HELP", "system")
+            add("logs search <word> — search indexed clues")
+            add("Try: logs search 03:17")
+            add("Try: logs search internal")
+            add("Read at least one archive file before searching.", "muted")
+        case "decode":
+            add("DECODE COMMAND // HELP", "system")
+            add("decode <answer> — submit your conclusion for Chapter 01")
+            add("You need at least two evidence files first.")
+            add("The accepted answer describes the signal's origin.", "muted")
+        case "hint", "hints":
+            add("HINT COMMAND // HELP", "system")
+            add("Type hint to reveal one hint at a time.")
+        case "status":
+            add("STATUS COMMAND // HELP", "system")
+            add("Shows chapter, evidence count, and current objective.")
+        default:
+            add("No detailed help for '\(topic)'. Try: help files, help logs, help decode, help hint", "warning")
+        }
+    }
+
+    private func showHint() {
+        let hintNumber = min(discovered.count, 3)
+        switch hintNumber {
+        case 0:
+            add("HINT 1/3: Start with the archive inventory.", "warning")
+            add("Try: files list", "muted")
+        case 1:
+            add("HINT 2/3: Open a second file and compare its timestamp and route metadata.", "warning")
+            add("Try: files read signal_fragment.dat", "muted")
+        default:
+            add("HINT 3/3: Search the records for 03:17 or internal. The source is described as an internal node.", "warning")
+            add("Try: logs search 03:17", "muted")
+        }
+    }
+
     private func readFile(_ name: String) {
         guard fileNames.contains(name) else {
             add("FILE NOT FOUND. Use 'files list' to see available records.", "error")
@@ -305,18 +357,18 @@ struct ContentView: View {
         switch name {
         case "incident_2049.log":
             add("OPENING incident_2049.log", "system")
-            add("03:17 // SIGNAL DETECTED")
-            add("Origin field: INTERNAL NODE")
-            add("Incident marked for deletion 00:04 after detection.")
+            add(isJapanese ? "03:17 // 信号を検出" : "03:17 // SIGNAL DETECTED")
+            add(isJapanese ? "発信源：内部ノード (INTERNAL NODE)" : "Origin field: INTERNAL NODE")
+            add(isJapanese ? "検出から4秒後にインシデント削除が予約された。" : "Incident marked for deletion 00:04 after detection.")
         case "signal_fragment.dat":
             add("DECODING signal_fragment.dat", "system")
-            add("FRAGMENT: 03-17 / IN-TERNAL / NODE")
-            add("Metadata: source route begins inside the AEGIS network.")
+            add(isJapanese ? "断片：03-17 / IN-TERNAL / NODE" : "FRAGMENT: 03-17 / IN-TERNAL / NODE")
+            add(isJapanese ? "メタデータ：信号経路はAEGISネットワーク内部から始まっている。" : "Metadata: source route begins inside the AEGIS network.")
         case "personnel.enc":
             add("READING personnel.enc", "system")
-            add("ACCESS RESTRICTED // PARTIAL CACHE RECOVERED")
-            add("A staff credential was active at 03:17.")
-            add("The operator's identity is missing from the official roster.")
+            add(isJapanese ? "アクセス制限 // キャッシュの一部を復元" : "ACCESS RESTRICTED // PARTIAL CACHE RECOVERED")
+            add(isJapanese ? "03:17に職員の認証情報が使用されていた。" : "A staff credential was active at 03:17.")
+            add(isJapanese ? "オペレーターの身元は公式名簿に存在しない。" : "The operator's identity is missing from the official roster.")
         default: break
         }
         add("EVIDENCE ADDED: \(name)", "success")
@@ -325,10 +377,14 @@ struct ContentView: View {
 
     private func evidenceDescription(_ item: String) -> String {
         switch item {
-        case "incident_2049.log": return "Incident log: signal detected at 03:17; origin field says INTERNAL NODE."
-        case "signal_fragment.dat": return "Signal fragment: route begins inside the AEGIS network."
-        case "personnel.enc": return "Personnel cache: an unlisted credential was active at 03:17."
-        default: return "Recovered record."
+        case "incident_2049.log":
+            return isJapanese ? "インシデント記録：03:17に信号を検出。発信源欄は「内部ノード」。" : "Incident log: signal detected at 03:17; origin field says INTERNAL NODE."
+        case "signal_fragment.dat":
+            return isJapanese ? "信号の断片：経路はAEGISネットワーク内部から始まっている。" : "Signal fragment: route begins inside the AEGIS network."
+        case "personnel.enc":
+            return isJapanese ? "職員キャッシュ：名簿にない認証情報が03:17に使用されていた。" : "Personnel cache: an unlisted credential was active at 03:17."
+        default:
+            return isJapanese ? "復元された記録。" : "Recovered record."
         }
     }
 

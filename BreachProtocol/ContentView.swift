@@ -397,6 +397,21 @@ struct ContentView: View {
             add(isJapanese ? "アクセス制限 // キャッシュの一部を復元" : "ACCESS RESTRICTED // PARTIAL CACHE RECOVERED")
             add(isJapanese ? "03:17に職員の認証情報が使用されていた。" : "A staff credential was active at 03:17.")
             add(isJapanese ? "オペレーターの身元は公式名簿に存在しない。" : "The operator's identity is missing from the official roster.")
+        case "watcher_trace.log":
+            add("OPENING watcher_trace.log", "system")
+            add(isJapanese ? "WATCHERは03:17から03:19まで同じ映像をループ再生。" : "WATCHER replayed the same camera feed from 03:17 to 03:19.")
+            add(isJapanese ? "外向き映像送信は03:19に停止。" : "Outbound camera transmission stopped at 03:19.")
+            add(isJapanese ? "停止命令は外部ではなく内部コンソールから発行。" : "Shutdown command originated from an internal console.")
+        case "blacksite_map.dat":
+            add("DECODING blacksite_map.dat", "system")
+            add(isJapanese ? "区画：SECTOR ZERO / 地下保管庫" : "SECTOR: ZERO / LOWER ARCHIVE")
+            add(isJapanese ? "公式図面にない通路が記録されている。" : "A corridor appears here but is absent from official AEGIS maps.")
+            add(isJapanese ? "扉の記録：STATION NINE。最後のアクセスは03:17。" : "Door label: STATION NINE. Last access recorded at 03:17.")
+        case "echo_message.txt":
+            add("RECOVERING echo_message.txt", "system")
+            add(isJapanese ? "送信者：MIRA VALE // 署名未検証" : "SENDER: MIRA VALE // SIGNATURE UNVERIFIED")
+            add(isJapanese ? "「時計を信じないで。時刻は内側から巻き戻された。」" : "\"Do not trust the clock. It was reset from the inside.\"")
+            add(isJapanese ? "追記：この記録を見つけたなら、私はまだここにいるかもしれない。" : "POSTSCRIPT: If you found this record, I may still be here.")
         default: break
         }
         add("EVIDENCE ADDED: \(name)", "success")
@@ -411,6 +426,12 @@ struct ContentView: View {
             return isJapanese ? "信号の断片：経路はAEGISネットワーク内部から始まっている。" : "Signal fragment: route begins inside the AEGIS network."
         case "personnel.enc":
             return isJapanese ? "職員キャッシュ：名簿にない認証情報が03:17に使用されていた。" : "Personnel cache: an unlisted credential was active at 03:17."
+        case "watcher_trace.log":
+            return isJapanese ? "監視映像は同じ場面を再生し続け、停止命令は内部から出ていた。" : "The camera feed looped; its shutdown command came from inside."
+        case "blacksite_map.dat":
+            return isJapanese ? "公式図面にない地下区画と、STATION NINEという扉が記録されている。" : "An unlisted lower-level corridor leads to a door marked STATION NINE."
+        case "echo_message.txt":
+            return isJapanese ? "MIRA VALEを名乗る人物からの警告。時計は内部から改ざんされたという。" : "An unverified warning from MIRA VALE claims the clock was altered from inside."
         default:
             return isJapanese ? "復元された記録。" : "Recovered record."
         }

@@ -34,7 +34,8 @@ jobs:
 
       - name: Package unsigned IPA
         run: |
-          APP_PATH="build/DerivedData/Build/Products/Release-iphoneos/BreachProtocol.app"
+          APP_PATH="$(find build/DerivedData/Build/Products/Release-iphoneos -maxdepth 1 -name '*.app' -print -quit)"
+          test -n "$APP_PATH"
           test -d "$APP_PATH"
           mkdir -p build/ipa/Payload
           cp -R "$APP_PATH" build/ipa/Payload/
@@ -46,8 +47,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: breach-protocol-ios-unsigned
-          path: |
-            build/DerivedData/Build/Products/Release-iphoneos/BreachProtocol.app
-            BREACH-PROTOCOL-unsigned.ipa
+          path: BREACH-PROTOCOL-unsigned.ipa
           if-no-files-found: error
           retention-days: 14

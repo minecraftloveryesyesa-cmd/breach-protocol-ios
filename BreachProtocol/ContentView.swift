@@ -142,7 +142,7 @@ struct ContentView: View {
             }
             HStack(spacing: 9) {
                 Text(">").font(.system(size: 17, weight: .bold, design: .monospaced)).foregroundStyle(Theme.cyan)
-                TextField("Enter command…", text: $input)
+                TextField(isJapanese ? "コマンドを入力…" : "Enter command…", text: $input)
                     .font(.system(size: 14, design: .monospaced)).foregroundStyle(.white)
                     .autocorrectionDisabled().textInputAutocapitalization(.never)
                     .submitLabel(.send).focused($inputFocused).onSubmit(submitCommand)
@@ -262,14 +262,23 @@ struct ContentView: View {
             } else { add("Unknown files operation. Try 'files list'.", "error") }
         case "logs":
             guard parts.count >= 3, parts[1] == "search" else { add("Usage: logs search <word>", "warning"); return }
-            let term = parts.dropFirst(2).joined(separator: " ")
-            let hasRecords = !discovered.isEmpty
-            guard hasRecords else { add("No indexed records. Read a file first.", "warning"); return }
-            if ["03:17", "internal", "node", "signal", "*", "aegis"].contains(term) {
-                add("MATCH: signal detected at 03:17", "success")
-                add("MATCH: origin classified as INTERNAL NODE", "success")
-                add("MATCH: operator ID withheld", "success")
-            } else { add("No matches for '\(term)'.", "warning") }
+            let term = parts.dropFirst(2).joined(separator: " ").trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+            guard !discovered.isEmpty else { add("No indexed records. Read a file first.", "warning"); return }
+            let records: [(String, String)] = [
+                ("incident_2049.log", "03:17 signal detected origin internal node incident deletion"),
+                ("signal_fragment.dat", "03-17 in-ternal node source route aegis network"),
+                ("personnel.enc", "restricted partial cache staff credential active 03:17 operator identity missing roster")
+            ].filter { discovered.contains($0.0) }
+            let matches = records.filter { term == "*" || $0.0.localizedCaseInsensitiveContains(term) || $0.1.localizedCaseInsensitiveContains(term) }
+            if matches.isEmpty {
+                add("No matches for '\(term)'.", "warning")
+            } else {
+                add("SEARCH RESULTS // \(matches.count)", "system")
+                for record in matches {
+                    add("MATCH IN \(record.0)", "success")
+                    add(record.1, "muted")
+                }
+            }
         case "evidence":
             if discovered.isEmpty { add("No evidence collected. Try 'files list'.", "warning") }
             else {

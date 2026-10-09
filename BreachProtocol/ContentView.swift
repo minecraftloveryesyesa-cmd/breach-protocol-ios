@@ -34,6 +34,7 @@ struct ContentView: View {
     ]
     @State private var discovered: Set<String> = []
     @State private var chapterComplete = false
+    @State private var hintLevel = 0
     @State private var showEvidence = false
     @FocusState private var inputFocused: Bool
 
@@ -293,10 +294,11 @@ struct ContentView: View {
         case "restart":
             discovered.removeAll()
             chapterComplete = false
+            hintLevel = 0
             lines = [
-                TerminalLine(text: "BREACH PROTOCOL // FIELD TERMINAL v1.0", kind: "system"),
-                TerminalLine(text: "New investigation initialized.", kind: "muted"),
-                TerminalLine(text: "INCOMING MESSAGE: IF YOU CAN READ THIS, THEY ALREADY KNOW.", kind: "warning")
+                TerminalLine(text: localized("BREACH PROTOCOL // FIELD TERMINAL v1.0"), kind: "system"),
+                TerminalLine(text: localized("New investigation initialized."), kind: "muted"),
+                TerminalLine(text: localized("INCOMING MESSAGE: IF YOU CAN READ THIS, THEY ALREADY KNOW."), kind: "warning")
             ]
             saveGame()
         default: add("Command not found: \(first). Type 'help' for available commands.", "error")
@@ -334,16 +336,16 @@ struct ContentView: View {
     }
 
     private func showHint() {
-        let hintNumber = min(discovered.count, 3)
-        switch hintNumber {
-        case 0:
-            add("HINT 1/3: Start with the archive inventory.", "warning")
-            add("Try: files list", "muted")
+        hintLevel = min(hintLevel + 1, 3)
+        switch hintLevel {
         case 1:
-            add("HINT 2/3: Open a second file and compare its timestamp and route metadata.", "warning")
+            add(isJapanese ? "ヒント 1/3：まずアーカイブの一覧を確認しよう。" : "HINT 1/3: Start with the archive inventory.", "warning")
+            add("Try: files list", "muted")
+        case 2:
+            add(isJapanese ? "ヒント 2/3：2つ目のファイルを開き、時刻と経路の情報を比べよう。" : "HINT 2/3: Open a second file and compare its timestamp and route metadata.", "warning")
             add("Try: files read signal_fragment.dat", "muted")
         default:
-            add("HINT 3/3: Search the records for 03:17 or internal. The source is described as an internal node.", "warning")
+            add(isJapanese ? "ヒント 3/3：03:17やinternalで検索しよう。発信源は内部ノードと記録されている。" : "HINT 3/3: Search the records for 03:17 or internal. The source is described as an internal node.", "warning")
             add("Try: logs search 03:17", "muted")
         }
     }

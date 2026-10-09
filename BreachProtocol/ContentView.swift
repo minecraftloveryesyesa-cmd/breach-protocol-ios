@@ -19,6 +19,8 @@ private struct SaveData: Codable {
     var lines: [TerminalLine]
     var discovered: [String]
     var chapterComplete: Bool
+    var chapterTwoUnlocked: Bool? = false
+    var chapterTwoComplete: Bool? = false
 }
 
 struct ContentView: View {
@@ -34,6 +36,8 @@ struct ContentView: View {
     ]
     @State private var discovered: Set<String> = []
     @State private var chapterComplete = false
+    @State private var chapterTwoUnlocked = false
+    @State private var chapterTwoComplete = false
     @State private var hintLevel = 0
     @State private var showEvidence = false
     @FocusState private var inputFocused: Bool
@@ -244,6 +248,7 @@ struct ContentView: View {
             add(isJapanese ? "restart              第01章を最初からやり直す" : "restart              Reset Chapter 01 progress")
             add(isJapanese ? "story                ストーリー記録を読む" : "story                Read the expanded story")
             add(isJapanese ? "timeline             事件の時系列を確認" : "timeline             Review the incident timeline")
+            if chapterTwoUnlocked { add(isJapanese ? "第02章が解放済み：files list / decode <答え>" : "CHAPTER 02 UNLOCKED: files list / decode <answer>", "success") }
         case "story", "lore", "briefing":
             showStory()
         case "timeline":
@@ -296,13 +301,25 @@ struct ContentView: View {
                 showEvidence = true
             }
         case "decode":
-            let answer = parts.dropFirst().joined(separator: " ").trimmingCharacters(in: .whitespacesAndNewlines)
-            if discovered.count >= 2 && ["internal node", "internal", "node"].contains(answer.lowercased()) {
+            let answer = parts.dropFirst().joined(separator: " ").trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+            if chapterTwoUnlocked {
+                let chapterTwoEvidence = discovered.intersection(["station_nine.log", "door_auth.enc", "mira_final.txt"]).count
+                if chapterTwoEvidence >= 2 && ["station nine", "station nine is the destination", "nine"].contains(answer) {
+                    chapterTwoComplete = true
+                    add("ACCESS GRANTED // STATION NINE IDENTIFIED", "success")
+                    add("CHAPTER 02 COMPLETE // MIRA VALE LEFT A LIVE CHANNEL.", "system")
+                    add("INCOMING: \"If this reached you, the archive is listening. Do not open the third door.\"", "warning")
+                } else if chapterTwoEvidence < 2 {
+                    add("INSUFFICIENT EVIDENCE. Read at least two Chapter 02 files.", "warning")
+                } else { add("DECODE FAILED. Compare the destination and access records.", "error") }
+            } else if discovered.count >= 2 && ["internal node", "internal", "node"].contains(answer) {
                 chapterComplete = true
                 add("CIPHER ACCEPTED.", "success")
                 add("CHAPTER 01 COMPLETE // SIGNAL ORIGIN: INTERNAL NODE", "system")
                 add("A new message appears: 'You found the door. Now find who opened it.'", "warning")
-                add("CHAPTER 02 is locked in this build. Your progress has been saved.", "muted")
+                chapterTwoUnlocked = true
+                add("CHAPTER 02 UNLOCKED // STATION NINE", "success")
+                add("New archive entries detected. Type 'files list' to continue.", "system")
             } else if discovered.count < 2 {
                 add("INSUFFICIENT EVIDENCE. Read at least two archive files.", "warning")
             } else { add("DECODE FAILED. Re-examine the records and search the logs.", "error") }
@@ -312,6 +329,8 @@ struct ContentView: View {
         case "restart":
             discovered.removeAll()
             chapterComplete = false
+            chapterTwoUnlocked = false
+            chapterTwoComplete = false
             hintLevel = 0
             lines = [
                 TerminalLine(text: localized("BREACH PROTOCOL // FIELD TERMINAL v1.0"), kind: "system"),
@@ -397,6 +416,18 @@ struct ContentView: View {
         }
         discovered.insert(name)
         switch name {
+        case "station_nine.log":
+            add(isJapanese ? "STATION NINE // 到着記録" : "STATION NINE // ARRIVAL LOG", "system")
+            add(isJapanese ? "公式地図にない駅。列車の記録はないのに、03:19にプラットフォームの照明が点灯した。" : "A station absent from official maps. No trains are logged, yet the platform lights activated at 03:19.")
+            add(isJapanese ? "行先コード：NINE。乗客欄には MIRA VALE とだけ記録されている。" : "Destination code: NINE. The passenger field contains only MIRA VALE.")
+        case "door_auth.enc":
+            add(isJapanese ? "扉認証 // 復元データ" : "DOOR AUTH // RECOVERED DATA", "system")
+            add(isJapanese ? "認証要求は外部からではなく、地下アーカイブの内側から発生した。" : "The access request originated inside the lower archive, not from outside.")
+            add(isJapanese ? "対象扉：STATION NINE。認証結果：許可。ただし署名鍵は失効済み。" : "Target: STATION NINE. Result: GRANTED. Signing key: REVOKED.")
+        case "mira_final.txt":
+            add(isJapanese ? "MIRA VALE // 最終メッセージ" : "MIRA VALE // FINAL MESSAGE", "system")
+            add(isJapanese ? "もしこの記録を読めるなら、私はまだシステム内にいる。駅は場所ではない。記録を移送するための経路だ。" : "If you can read this, I am still inside the system. The station is not a place. It is a route used to move records.")
+            add(isJapanese ? "行先を問われたら、STATION NINE と答えて。三つ目の扉は開けないで。" : "If asked for the destination, answer STATION NINE. Do not open the third door.", "warning")
         case "incident_2049.log":
             add("OPENING incident_2049.log", "system")
             add(isJapanese ? "03:17 // 信号を検出" : "03:17 // SIGNAL DETECTED")
@@ -510,7 +541,7 @@ struct ContentView: View {
     }
 
     private func saveGame() {
-        let data = SaveData(lines: lines, discovered: Array(discovered), chapterComplete: chapterComplete)
+        let data = SaveData(lines: lines, discovered: Array(discovered), chapterComplete: chapterComplete, chapterTwoUnlocked: chapterTwoUnlocked, chapterTwoComplete: chapterTwoComplete)
         if let encoded = try? JSONEncoder().encode(data) {
             UserDefaults.standard.set(encoded, forKey: "bp_save_data")
             hasSave = true
@@ -524,5 +555,7 @@ struct ContentView: View {
         lines = saved.lines
         discovered = Set(saved.discovered)
         chapterComplete = saved.chapterComplete
+        chapterTwoUnlocked = saved.chapterTwoUnlocked ?? saved.chapterComplete
+        chapterTwoComplete = saved.chapterTwoComplete ?? false
     }
 }

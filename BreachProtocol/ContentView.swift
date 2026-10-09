@@ -38,7 +38,7 @@ struct ContentView: View {
     @State private var showEvidence = false
     @FocusState private var inputFocused: Bool
 
-    private let fileNames = ["incident_2049.log", "signal_fragment.dat", "personnel.enc"]
+    private let fileNames = ["incident_2049.log", "signal_fragment.dat", "personnel.enc", "watcher_trace.log", "blacksite_map.dat", "echo_message.txt"]
 
     var body: some View {
         ZStack {
@@ -97,7 +97,7 @@ struct ContentView: View {
         HStack {
             Label(isJapanese ? "AEGIS / 機密区分" : "AEGIS / RESTRICTED", systemImage: "lock.fill")
             Spacer()
-            Text(isJapanese ? "証拠 \(discovered.count)/3" : "EVIDENCE \(discovered.count)/3").foregroundStyle(Theme.cyan)
+            Text(isJapanese ? "証拠 \(discovered.count)/6" : "EVIDENCE \(discovered.count)/6").foregroundStyle(Theme.cyan)
             Button { showEvidence = true } label: {
                 Image(systemName: "folder.badge.questionmark").foregroundStyle(Theme.cyan)
             }
@@ -242,6 +242,9 @@ struct ContentView: View {
             add(isJapanese ? "decode <answer>      第01章の答えを送信" : "decode <answer>      Submit the Chapter 01 cipher")
             add(isJapanese ? "clear                端末表示を消去" : "clear                Clear visible terminal")
             add(isJapanese ? "restart              第01章を最初からやり直す" : "restart              Reset Chapter 01 progress")
+            add(isJapanese ? "story                ストーリー記録を読む" : "story                Read the expanded story")
+        case "story", "lore", "briefing":
+            showStory()
         case "hint", "hints":
             showHint()
         case "status":
@@ -267,7 +270,10 @@ struct ContentView: View {
             let records: [(String, String)] = [
                 ("incident_2049.log", "03:17 signal detected origin internal node incident deletion"),
                 ("signal_fragment.dat", "03-17 in-ternal node source route aegis network"),
-                ("personnel.enc", "restricted partial cache staff credential active 03:17 operator identity missing roster")
+                ("personnel.enc", "restricted partial cache staff credential active 03:17 operator identity missing roster"),
+                ("watcher_trace.log", "watcher echo surveillance loop no operator outbound packet 03:19"),
+                ("blacksite_map.dat", "sector zero lower archive station nine sealed door route below aegis"),
+                ("echo_message.txt", "mira vale do not trust the clock it was reset from inside")
             ].filter { discovered.contains($0.0) }
             let matches = records.filter { term == "*" || $0.0.localizedCaseInsensitiveContains(term) || $0.1.localizedCaseInsensitiveContains(term) }
             if matches.isEmpty {
@@ -314,6 +320,17 @@ struct ContentView: View {
         }
     }
 
+    private func showStory() {
+        add(isJapanese ? "BREACH PROTOCOL // 調査資料" : "BREACH PROTOCOL // INVESTIGATION DOSSIER", "system")
+        add(isJapanese ? "背景：2049年、都市インフラを統合管理するAEGISは、あらゆる異常を公式記録から消せると噂されている。" : "BACKGROUND: In 2049, AEGIS manages the city’s critical infrastructure. Rumor says it can make any incident disappear from official records.", "muted")
+        add(isJapanese ? "あなたは匿名の調査員。午前03:17、閉鎖済み施設から短い信号が届いた。公式記録では、その施設は12年前に廃止されている。" : "You are an anonymous investigator. At 03:17, a short signal arrived from a sealed facility officially decommissioned twelve years ago.")
+        add(isJapanese ? "第一の謎：信号は内部ノードから発信された。誰かが施設の中にいるのか、それともシステム自体が発信しているのか？" : "MYSTERY ONE: The signal came from an internal node. Is someone inside—or is the system itself transmitting?", "warning")
+        add(isJapanese ? "人物記録：MIRA VALE。元AEGIS監査員。12年前の閉鎖記録を最後に名簿から消えている。彼女の署名を模したメッセージが復元されたが、本物かは不明。" : "PERSON OF INTEREST: MIRA VALE, a former AEGIS auditor who vanished from the roster after the facility closure. A message bearing her signature was recovered, but its authenticity is unverified.")
+        add(isJapanese ? "第二の謎：WATCHER監視系は03:17から同じ映像を再生し続け、03:19に内部コンソールから停止された。" : "MYSTERY TWO: WATCHER replayed the same camera feed from 03:17 until an internal console shut it down at 03:19.")
+        add(isJapanese ? "第三の謎：公式図面にない地下区画SECTOR ZERO。その奥にはSTATION NINEという扉がある。" : "MYSTERY THREE: SECTOR ZERO, a lower archive absent from official maps. A door inside is labeled STATION NINE.")
+        add(isJapanese ? "調査方針：記録を集め、時刻・署名・経路の矛盾を比較しよう。ひとつの証拠だけで結論を決めないこと。" : "INVESTIGATION: Collect records and compare contradictions in timestamps, signatures, and routes. Do not trust a conclusion based on a single clue.", "muted")
+        add(isJapanese ? "次の手がかり：files list で追加ファイルを確認しよう。" : "NEXT LEADS: Use files list to inspect the new records.", "success")
+    }
     private func showCommandHelp(_ topic: String) {
         switch topic {
         case "files":

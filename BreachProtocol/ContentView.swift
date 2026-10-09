@@ -410,7 +410,8 @@ struct ContentView: View {
     }
 
     private func readFile(_ name: String) {
-        guard let matchedName = fileNames.first(where: { $0.caseInsensitiveCompare(name) == .orderedSame }) else {
+        let availableNames = chapterTwoUnlocked ? fileNames + ["station_nine.log", "door_auth.enc", "mira_final.txt"] : fileNames
+        guard let matchedName = availableNames.first(where: { $0.caseInsensitiveCompare(name) == .orderedSame }) else {
             add("FILE NOT FOUND. Use 'files list' to see available records.", "error")
             return
         }

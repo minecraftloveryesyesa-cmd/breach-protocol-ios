@@ -97,7 +97,7 @@ struct ContentView: View {
         HStack {
             Label(isJapanese ? "AEGIS / 機密区分" : "AEGIS / RESTRICTED", systemImage: "lock.fill")
             Spacer()
-            Text("EVIDENCE \(discovered.count)/3").foregroundStyle(Theme.cyan)
+            Text(isJapanese ? "証拠 \(discovered.count)/3" : "EVIDENCE \(discovered.count)/3").foregroundStyle(Theme.cyan)
             Button { showEvidence = true } label: {
                 Image(systemName: "folder.badge.questionmark").foregroundStyle(Theme.cyan)
             }
@@ -232,16 +232,16 @@ struct ContentView: View {
                 return
             }
             add("AVAILABLE COMMANDS", "system")
-            add("help [command]       Show detailed command help")
-            add("hint                 Get a progressive puzzle hint")
-            add("status               Mission status")
-            add("files list           List available files")
-            add("files read <name>    Read an evidence file")
-            add("logs search <word>   Search discovered records")
-            add("evidence             Review collected clues")
-            add("decode <answer>      Submit the Chapter 01 cipher")
-            add("clear                Clear visible terminal")
-            add("restart              Reset Chapter 01 progress")
+            add(isJapanese ? "help [command]       詳細ヘルプを表示" : "help [command]       Show detailed command help")
+            add(isJapanese ? "hint                 段階的なヒントを表示" : "hint                 Get a progressive puzzle hint")
+            add(isJapanese ? "status               ミッション状況" : "status               Mission status")
+            add(isJapanese ? "files list           ファイル一覧を表示" : "files list           List available files")
+            add(isJapanese ? "files read <name>    証拠ファイルを読む" : "files read <name>    Read an evidence file")
+            add(isJapanese ? "logs search <word>   調査済み記録を検索" : "logs search <word>   Search discovered records")
+            add(isJapanese ? "evidence             収集した手がかりを確認" : "evidence             Review collected clues")
+            add(isJapanese ? "decode <answer>      第01章の答えを送信" : "decode <answer>      Submit the Chapter 01 cipher")
+            add(isJapanese ? "clear                端末表示を消去" : "clear                Clear visible terminal")
+            add(isJapanese ? "restart              第01章を最初からやり直す" : "restart              Reset Chapter 01 progress")
         case "hint", "hints":
             showHint()
         case "status":
@@ -317,28 +317,28 @@ struct ContentView: View {
     private func showCommandHelp(_ topic: String) {
         switch topic {
         case "files":
-            add("FILES COMMAND // HELP", "system")
-            add("files list — show all archive filenames")
-            add("files read <name> — open one file and collect its evidence")
-            add("Example: files read incident_2049.log")
-            add("Tip: filenames must match the archive list exactly.", "muted")
+            add(isJapanese ? "ファイルコマンド // ヘルプ" : "FILES COMMAND // HELP", "system")
+            add(isJapanese ? "files list — アーカイブの一覧を表示" : "files list — show all archive filenames")
+            add(isJapanese ? "files read <name> — ファイルを開いて証拠を収集" : "files read <name> — open one file and collect its evidence")
+            add(isJapanese ? "例：files read incident_2049.log" : "Example: files read incident_2049.log")
+            add(isJapanese ? "ヒント：ファイル名は一覧と完全に一致させてください。" : "Tip: filenames must match the archive list exactly.", "muted")
         case "logs":
-            add("LOGS COMMAND // HELP", "system")
-            add("logs search <word> — search indexed clues")
+            add(isJapanese ? "ログコマンド // ヘルプ" : "LOGS COMMAND // HELP", "system")
+            add(isJapanese ? "logs search <word> — 記録された手がかりを検索" : "logs search <word> — search indexed clues")
             add("Try: logs search 03:17")
             add("Try: logs search internal")
-            add("Read at least one archive file before searching.", "muted")
+            add(isJapanese ? "検索前にアーカイブを1つ以上読んでください。" : "Read at least one archive file before searching.", "muted")
         case "decode":
-            add("DECODE COMMAND // HELP", "system")
-            add("decode <answer> — submit your conclusion for Chapter 01")
-            add("You need at least two evidence files first.")
+            add(isJapanese ? "解読コマンド // ヘルプ" : "DECODE COMMAND // HELP", "system")
+            add(isJapanese ? "decode <answer> — 第01章の答えを送信" : "decode <answer> — submit your conclusion for Chapter 01")
+            add(isJapanese ? "先に証拠ファイルを2つ以上確認してください。" : "You need at least two evidence files first.")
             add("The accepted answer describes the signal's origin.", "muted")
         case "hint", "hints":
-            add("HINT COMMAND // HELP", "system")
-            add("Type hint to reveal one hint at a time.")
+            add(isJapanese ? "ヒントコマンド // ヘルプ" : "HINT COMMAND // HELP", "system")
+            add(isJapanese ? "hintを入力すると、ヒントが1つずつ表示されます。" : "Type hint to reveal one hint at a time.")
         case "status":
-            add("STATUS COMMAND // HELP", "system")
-            add("Shows chapter, evidence count, and current objective.")
+            add(isJapanese ? "ステータスコマンド // ヘルプ" : "STATUS COMMAND // HELP", "system")
+            add(isJapanese ? "章、証拠の数、現在の目標を表示します。" : "Shows chapter, evidence count, and current objective.")
         default:
             add("No detailed help for '\(topic)'. Try: help files, help logs, help decode, help hint", "warning")
         }
